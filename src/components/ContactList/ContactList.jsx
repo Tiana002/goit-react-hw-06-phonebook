@@ -1,32 +1,47 @@
-import PropTypes from 'prop-types';
-import { ListItem } from '../ContactListItem/ContactListItem';
-import { List } from './ContactList.styled';
+import { List, Item, Button, Text } from './ContactList.styled';
+import { useSelector, useDispatch } from 'react-redux';
+import { getContacts, getFilters } from 'redux/selector';
+import { deleteContact } from 'redux/contactsSlice';
+import { nanoid } from 'nanoid';
 
-export const ContactList = ({ contacts, deleteContact }) => {
-  return (
-  <List>
-     {contacts.map(({ id, name, number }) => (
-        <ListItem 
-           key={id}
-           id={id}
-           name={name}
-           number={number}
-           deleteContact={deleteContact} />
-  ))}
-  </List> 
-  );
+export const ContactList = () => {
+  const dispatch = useDispatch();
 
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(getFilters);
+
+  const filterContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(filter)
+	);
+
+  const handleRemoveContact = id => {
+    dispatch(deleteContact(id));
   };
 
-ContactList.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-      id: PropTypes.string.isRequired,
-    }).isRequired
-  ),
-  deleteContact: PropTypes.func,
+  return (
+    <List>
+    {filterContacts.map(contact => {
+      return (
+        <Item key={nanoid()}>
+          <Text>
+            {contact.name}: {contact.number}
+          </Text>
+          <Button
+            type="button"
+            onClick={() => {
+              handleRemoveContact(contact.id);
+            }}
+          >
+            delete
+          </Button>
+        </Item>
+      );
+    })}
+  </List>
+);
 };
+  
+
+
 
 
